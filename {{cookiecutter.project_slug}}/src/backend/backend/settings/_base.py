@@ -55,6 +55,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'corsheaders',
+
     'rosetta',
 
     'rest_framework',
@@ -189,17 +191,17 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = f'/media/'
 
 
-# ################################################################
-# ################ INTERNAL SETTINGS ENDS ########################
-# ################################################################
-
-REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
-    ]
-}
+# Email settings
+EMAIL_HOST = get_secret('EMAIL_HOST')
+EMAIL_HOST_USER = get_secret('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = get_secret('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = get_secret('EMAIL_PORT')
+SERVER_EMAIL = get_secret('SERVER_EMAIL')
+DEFAULT_FROM_EMAIL = get_secret('DEFAULT_FROM_EMAIL')
+EMAIL_USE_TLS = get_secret('EMAIL_USE_TLS')
+EMAIL_USE_SSL = get_secret('EMAIL_USE_SSL')
+ADMINS = get_secret('BACKEND_ADMINS')
+MANAGERS = get_secret('BACKEND_MANAGERS')
 
 
 # #################################################################
@@ -261,3 +263,18 @@ REST_FRAMEWORK = {
 # ################ LOGGING SETTINGS ENDS #########################
 # ################################################################
 
+
+# ################################################################
+# ################ INTERNAL SETTINGS ENDS ########################
+# ################################################################
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
+    ]
+}
+
+# CORS HEADERS SETTINGS
+CORS_ALLOWED_ORIGINS = get_secret('BACKEND_CORS_ORIGINS')

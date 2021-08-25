@@ -1,19 +1,23 @@
 default_context:
   project_name: '{{ cookiecutter.project_name }}'
   project_slug: '{{ cookiecutter.project_slug }}'
+  domain_main: '{{ cookiecutter.domain_main }}'
   backend_cors_origins: '{{ cookiecutter.backend_cors_origins }}'
-
+  backend_admins: '{{ cookiecutter.backend_admins }}'
+  backend_managers: '{{ cookiecutter.backend_managers }}'
+  "first_superuser": "admin@{{cookiecutter.domain_main}}",
+  "first_superuser_password": "changethis",
   postgres_db: '{{ cookiecutter.postgres_db }}'
   postgres_user: '{{ cookiecutter.postgres_user }}'
   postgres_password: '{{ cookiecutter.postgres_password }}'
   postgres_port: '{{ cookiecutter.postgres_port }}'
-
+  "pgadmin_default_user": "{{cookiecutter.first_superuser}}",
+  "pgadmin_default_user_password": "{{cookiecutter.first_superuser_password}}",
   smtp_port: '{{ cookiecutter.smtp_port }}'
   smtp_host: '{{ cookiecutter.smtp_host }}'
   smtp_user: '{{ cookiecutter.smtp_user }}'
   smtp_password: '{{ cookiecutter.smtp_password }}'
   smtp_emails_from_email: '{{ cookiecutter.smtp_emails_from_email }}'
-
   docker_image_prefix: '{{ cookiecutter.docker_image_prefix }}'
   docker_image_backend: '{{ cookiecutter.docker_image_backend }}'
   docker_image_celeryworker: '{{ cookiecutter.docker_image_celeryworker }}'

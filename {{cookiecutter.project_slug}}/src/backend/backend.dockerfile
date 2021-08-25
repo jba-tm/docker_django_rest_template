@@ -26,7 +26,6 @@ WORKDIR /home/${USER}
 # copy Django project files
 COPY --chown=${USER} . .
 
-
 # Allow installing dev dependencies to run tests
 ARG INSTALL_DEV=false
 
@@ -35,4 +34,8 @@ RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then pipenv install --system --depl
 RUN pipenv shell
 
 
+COPY ./server-start.sh ./server-start.sh
 
+RUN chmod +x ./server-start.sh
+
+CMD ["bash", "./worker-start.sh"]

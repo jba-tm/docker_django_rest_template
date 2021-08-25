@@ -2,7 +2,6 @@
 # pull official base image
 FROM python:3.9.6
 # accept arguments
-ARG PIP_REQUIREMENTS=production.txt
 ARG USER
 
 # set environment variables
@@ -12,7 +11,7 @@ ENV PYTHONUNBUFFERED 1
 
 # install dependencies
 RUN pip install --upgrade pip setuptools wheel
-# create user for the Django project
+RUN pip install pipenv
 
 # Add user that will be used in the container.
 # RUN useradd ${USER}
@@ -24,15 +23,20 @@ USER ${USER}
 # Use /home/${DATABASE_USER} folder as a directory where the source code is stored.
 WORKDIR /home/${USER}
 
-# create and activate virtual environment
-RUN python3 -m venv venv
-
-RUN ./venv/bin/python3 -m pip install pip setuptools wheel --upgrade
-
-# copy and install pip requirements
-COPY --chown=${USER} ./requirements /home/${USER}/requirements/
-RUN ./venv/bin/pip3 install -r /home/${USER}/requirements/${PIP_REQUIREMENTS}
-
-
 # copy Django project files
-COPY --chown=${USER} ./ /home/${USER}/
+COPY --chown=${USER} . .
+
+
+# Allow installing dev dependencies to run tests
+ARG INSTALL_DEV=false
+
+# create and activate virtual environment
+RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then pipenv install --system --deploy -e . ; else pipenv install --dev -e . ; fi"
+RUN pipenv shell
+
+COPY ./worker-start.sh ./worker-start.sh
+
+
+RUN chmod +x ./worker-start.sh
+
+CMD ["bash", "./worker-start.sh"]
