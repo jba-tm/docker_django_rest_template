@@ -1,0 +1,113 @@
+version: "3.9"
+
+services:
+  nginx:
+    image: nginx:latest
+    restart: on-failure
+    ports:
+      - "80:80"
+      - "443:443"
+      - "5050:5050"
+    volumes:
+      - ./config/nginx/conf.d:/etc/nginx/conf.d
+      - static_volume:/home/${DATABASE_USER}/static
+      - media_volume:/home/${DATABASE_USER}/media
+    depends_on:
+      - backend
+
+  backend:
+    restart: on-failure
+    env_file:
+      - .env
+    build:
+      context: ./src/backend
+      dockerfile: backend.dockerfile
+      args:
+        PIP_REQUIREMENTS: ${PIP_REQUIREMENTS}
+        USER: ${{DATABASE_USER}}
+    command: bash -c "./venv/bin/gunicorn --workers 3 --bind 0.0.0.0:8080 backend.wsgi:application"
+    depends_on:
+      - db
+    volumes:
+      - static_volume:/home/${DATABASE_USER}/static
+      - media_volume:/home/${DATABASE_USER}/media
+    ports:
+      - "8080:8080"
+    environment:
+      DJANGO_SETTINGS_MODULE: "${DJANGO_SETTINGS_MODULE}"
+      DJANGO_SECRET_KEY: "${DJANGO_SECRET_KEY}"
+      DATABASE_NAME: "${DATABASE_NAME}"
+      DATABASE_HOST: "${DATABASE_HOST}"
+      DATABASE_USER: "${DATABASE_USER}"
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
+      EMAIL_HOST: "${EMAIL_HOST}"
+      EMAIL_PORT: "${EMAIL_PORT}"
+      EMAIL_HOST_USER: "${EMAIL_HOST_USER}"
+      EMAIL_HOST_PASSWORD: "${EMAIL_HOST_PASSWORD}"
+
+  db:
+    image: postgres:latest
+    restart: on-failure
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: "${DATABASE_NAME}"
+      POSTGRES_USER: "${DATABASE_USER}"
+      POSTGRES_PASSWORD: "${DATABASE_PASSWORD}"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+  pgadmin:
+    image: dpage/pgadmin4
+    networks:
+      - default
+    depends_on:
+      - db
+    env_file:
+      - .env
+
+  dbbackups:
+    image: kartoza/pg-backup:13.0
+    hostname: pg-backups
+    volumes:
+      - dbbackups:/backups
+    ports:
+      - "5433:5432"
+    environment:
+      - DUMPPREFIX=${DATABASE_NAME}
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASS=${DATABASE_PASSWORD}
+      - POSTGRES_PORT=${DATABASE_PORT}
+      - POSTGRES_HOST=db
+      - POSTGRES_DBNAME=${DATABASE_NAME}
+    restart: on-failure
+    depends_on:
+      - db
+  redis:
+    image: redis:alpine
+    restart: on-failure
+    ports:
+      - "6379:6379"
+
+  celery:
+    restart: on-failure
+    build:
+      context: ./src/backend
+      dockerfile: celery.dockerfile
+      args:
+        PIP_REQUIREMENTS: ${PIP_REQUIREMENTS}
+        DATABASE_USER: ${DATABASE_USER}
+#    command: bash -c "./venv/bin/celery -A backend worker -l info"
+    depends_on:
+      - db
+      - redis
+      - gunicorn
+
+volumes:
+  dbbackups:
+  postgres_data:
+  static_volume:
+  media_volume:
