@@ -26,7 +26,7 @@ services:
       dockerfile: backend.dockerfile
       args:
         INSTALL_DEV: ${INSTALL_DEV}
-        USER: ${{DATABASE_USER}}
+        USER: ${DATABASE_USER}
 #    command: bash -c "./venv/bin/gunicorn --workers 3 --bind 0.0.0.0:8080 backend.wsgi:application"
     depends_on:
       - db

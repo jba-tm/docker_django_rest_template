@@ -1,1 +1,1 @@
-# django_rest_template
+# {{ cookiecutter.project_slug }}
