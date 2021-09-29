@@ -20,6 +20,6 @@ default_context:
   smtp_emails_from_email: '{{ cookiecutter.smtp_emails_from_email }}'
   docker_image_prefix: '{{ cookiecutter.docker_image_prefix }}'
   docker_image_backend: '{{ cookiecutter.docker_image_backend }}'
-  docker_image_celeryworker: '{{ cookiecutter.docker_image_celeryworker }}'
+  docker_image_celery_worker: '{{ cookiecutter.docker_image_celeryworker }}'
   docker_image_frontend: '{{ cookiecutter.docker_image_frontend }}'
   _template: ./
